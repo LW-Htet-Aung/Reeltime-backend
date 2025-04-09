@@ -1,13 +1,14 @@
 import asyncHandler from "express-async-handler";
 import User from "../models/User.js";
 import generateToken from "../utils/generateToken.js";
+import bcrypt from "bcryptjs";
 
 const registerUser = asyncHandler(async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
     const existUser = await User.findOne({ email });
-
+    console.log(existUser, "user");
     if (existUser) {
       return res.status(400).json({ message: "Email already exists" });
     }
@@ -25,7 +26,9 @@ const registerUser = asyncHandler(async (req, res) => {
 const loginUser = asyncHandler(async (req, res) => {
   try {
     const { email, password } = req.body;
+    console.log(req.body)
     const user = await User.findOne({ email });
+    console.log(user,'logn')
     if (!user) {
       return res.status(400).json({ message: "Invalid Credentials" });
     }
@@ -34,11 +37,12 @@ const loginUser = asyncHandler(async (req, res) => {
     if (!passwordMatch) {
       return res.status(400).json({ message: "Invalid Credentials" });
     }
-    generateToken(req, user._id);
+    generateToken(res, user._id);
     return res
       .status(201)
       .json({ message: "Successfully Signed In", data: user });
   } catch (error) {
+    console.log(error,'err')
     return res.status(500).json({ message: "Server Error" });
   }
 });
